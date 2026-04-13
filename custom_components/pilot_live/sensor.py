@@ -12,7 +12,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "pilotlive"
+DOMAIN = "pilot_live"
 API_URL = "https://app.pilotlive.co.za/api/Mobile/Sitelist"
 SCAN_INTERVAL = timedelta(seconds=300)
 
