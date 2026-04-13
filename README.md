@@ -1,2 +1,2 @@
 # ha-pilotlive
-Pilot Live Sensor for Home Assistnat
+Pilot Live Sensor for Home Assistanat
