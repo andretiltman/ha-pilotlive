@@ -1,0 +1,11 @@
+{
+  "domain": "pilotlive",
+  "name": "PilotLive Integration",
+  "version": "1.0.4",
+  "config_flow": true,
+  "documentation": "https://github.com/andretiltman/ha-pilotlive",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": [ "@andretiltman" ],
+  "iot_class": "cloud_polling"
+}
