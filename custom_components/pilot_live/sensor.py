@@ -17,29 +17,18 @@ API_URL = "https://app.pilotlive.co.za/api/Mobile/Sitelist"
 SCAN_INTERVAL = timedelta(seconds=300)
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    session_id = config.get("session_id")
-
-    _LOGGER.warning("PilotLive platform is loading...")
+async def async_setup_entry(hass, entry, async_add_entities):
+    session_id = entry.data["session_id"]
 
     coordinator = PilotLiveCoordinator(hass, session_id)
-
-    # Fetch initial data
     await coordinator.async_config_entry_first_refresh()
 
-    if not coordinator.data:
-        _LOGGER.error("No data returned from API")
-        return
-
-    _LOGGER.warning("Data received from API")
-
-    entities = []
-
-    for site in coordinator.data.get("SITE", []):
-        entities.append(PilotLiveSensor(coordinator, site["ID"], site["NAME"]))
+    entities = [
+        PilotLiveSensor(coordinator, site)
+        for site in coordinator.data.get("SITE", [])
+    ]
 
     async_add_entities(entities)
-
 
 class PilotLiveCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, session_id):
