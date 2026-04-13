@@ -1,0 +1,7 @@
+{
+    "name": "PilotLive Integration",
+    "content_in_root": false,
+    "country": "ZA",
+    "domain": "pilot_live",
+    "iot_class" : "cloud_polling"
+  }
