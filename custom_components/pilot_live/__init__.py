@@ -1,6 +1,6 @@
 from homeassistant.core import HomeAssistant
 
-DOMAIN = "pilotlive"
+DOMAIN = "pilot_live"
 
 async def async_setup_entry(hass: HomeAssistant, entry):
     hass.data.setdefault(DOMAIN, {})
