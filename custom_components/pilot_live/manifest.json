@@ -1,8 +1,8 @@
 {
-  "domain": "pilotlive",
+  "domain": "pilot_live",
   "name": "PilotLive Integration",
   "version": "1.0.0",
-  "documentation": "https://github.com/andretiltman/pilotlive",
+  "documentation": "https://github.com/andretiltman/ha-pilotlive",
   "requirements": [],
   "dependencies": [],
   "codeowners": [ "@andretiltman" ],
