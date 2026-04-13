@@ -1,7 +1,8 @@
 # HA Pilot Live [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 
-Pilot Live Sensor for Home Assistanat
+Pilot Live Sensor for Home Assistant
 
+<img src="img/preview.png" width="auto" height="auto"/>
 
 # Manual Install
 <details>
