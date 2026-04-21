@@ -24,7 +24,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
     await coordinator.async_config_entry_first_refresh()
 
     entities = [
-        PilotLiveSensor(coordinator, site)
+        PilotLiveSensor(
+            coordinator,
+            site["ID"],
+            site["NAME"]
+        )
         for site in coordinator.data.get("SITE", [])
     ]
 
@@ -78,9 +82,14 @@ class PilotLiveSensor(CoordinatorEntity, SensorEntity):
     @property
     def state(self):
         site = self._get_site()
-        if site:
-            return site.get("NAME")
-        return None
+        if not site:
+            return None
+        
+        for row in site.get("ROW", []):
+            if row.get("DESC") == "Premium Version":
+                return row.get("VALUE")
+
+        return "Unknown"
 
     @property
     def extra_state_attributes(self):
@@ -92,3 +101,16 @@ class PilotLiveSensor(CoordinatorEntity, SensorEntity):
             row.get("DESC"): row.get("VALUE")
             for row in site.get("ROW", [])
         }
+
+    @property
+    def icon(self):
+        site = self._get_site()
+        if not site:
+            return "mdi:store-off"
+
+        for row in site.get("ROW", []):
+            if row.get("DESC") == "Premium Version":
+                if "OFFLINE" in row.get("VALUE", ""):
+                    return "mdi:store-off"
+
+        return "mdi:store"
