@@ -1,0 +1,33 @@
+# Example Lovelace card for the Turnover by Day report.
+#
+# Requires the trigger-based template sensor from
+# `turnover-by-day-sensor.yaml` to be set up first — that sensor calls the
+# pilotlive.turnover_by_day_report service on a schedule and caches the rows
+# as an attribute, which this card renders as a table.
+#
+# Built entirely with the built-in Markdown card, no extra HACS frontend
+# cards required.
+#
+# Replace `sensor.pilotlive_valley_brewery_turnover_by_day` with your own
+# cached report sensor's entity_id.
+type: markdown
+title: Turnover by Day — Valley Brewery
+# Table rows are built as a list and joined with an explicit \n inside the
+# {{ }} expression rather than written as literal template lines, since a
+# folded (>) YAML scalar collapses real newlines into spaces and would merge
+# every row onto a single broken line.
+content: >
+  {%- set rows = state_attr('sensor.pilotlive_valley_brewery_turnover_by_day', 'rows') -%}
+  {%- if not rows -%}
+  No report data available yet — it updates every 6 hours and on startup.
+  {%- else -%}
+  {%- set ns = namespace(lines=['| Date | Day | Sales Excl | Sales Incl | Discount Incl |', '| --- | --- | ---: | ---: | ---: |']) -%}
+  {%- for row in rows -%}
+  {%- if row.highlight == '2' -%}
+  {%- set ns.lines = ns.lines + ['| **' ~ row['Date'] ~ '** | ' ~ row['Day'] ~ ' | **R ' ~ row['Sales Excl'] ~ '** | **R ' ~ row['Sales Incl'] ~ '** | **R ' ~ row['Discnt Incl'] ~ '** |'] -%}
+  {%- else -%}
+  {%- set ns.lines = ns.lines + ['| ' ~ row['Date'] ~ ' | ' ~ row['Day'] ~ ' | R ' ~ row['Sales Excl'] ~ ' | R ' ~ row['Sales Incl'] ~ ' | R ' ~ row['Discnt Incl'] ~ ' |'] -%}
+  {%- endif -%}
+  {%- endfor -%}
+  {{ ns.lines | join('\n') }}
+  {%- endif -%}

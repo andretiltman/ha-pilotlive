@@ -1,0 +1,26 @@
+# Trigger-based template sensor that periodically calls the
+# pilotlive.turnover_by_day_report service and caches the result so it can be
+# displayed on a dashboard. Add this under `template:` in configuration.yaml
+# (merge with any existing `template:` block).
+#
+# Replace `sensor.pilotlive_valley_brewery` with your store's entity_id.
+template:
+  - trigger:
+      - trigger: time_pattern
+        hours: "/6"
+      - trigger: homeassistant
+        event: start
+    action:
+      - action: pilotlive.turnover_by_day_report
+        target:
+          entity_id: sensor.pilotlive_valley_brewery
+        data:
+          from_date: "{{ (now() - timedelta(days=30)).strftime('%Y-%m-%d') }}"
+          to_date: "{{ now().strftime('%Y-%m-%d') }}"
+        response_variable: report
+    sensor:
+      - name: PilotLive Valley Brewery Turnover by Day
+        unique_id: pilotlive_valley_brewery_turnover_by_day
+        state: "{{ now().isoformat() }}"
+        attributes:
+          rows: "{{ report['sensor.pilotlive_valley_brewery'].rows }}"

@@ -142,3 +142,21 @@ sensor.pilotlive_valley_brewery:
       highlight: "2"
       seq: "18"
 ```
+
+### Dashboard example
+
+Service calls with response data aren't available directly as Lovelace card
+sources, so the response has to be cached on an entity first. The example in
+[`lovelace-examples/turnover-by-day-sensor.yaml`](lovelace-examples/turnover-by-day-sensor.yaml)
+is a trigger-based template sensor (add it under `configuration.yaml`) that
+calls `pilotlive.turnover_by_day_report` for the trailing 30 days on startup
+and every 6 hours, caching the rows as an attribute.
+
+[`lovelace-examples/turnover-by-day-card.yaml`](lovelace-examples/turnover-by-day-card.yaml)
+is a Markdown card — again, no extra HACS frontend cards required — that
+renders those cached rows as a table, with the Total row shown in bold.
+
+Replace `sensor.pilotlive_valley_brewery` and
+`sensor.pilotlive_valley_brewery_turnover_by_day` in both files with your own
+entity_ids, then add the card via **Edit Dashboard → Add Card → Manual** in
+Lovelace.
