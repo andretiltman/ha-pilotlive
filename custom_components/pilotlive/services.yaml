@@ -1,0 +1,23 @@
+turnover_by_day_report:
+  name: Turnover by day report
+  description: >-
+    Fetch the PilotLive "Turnover by Day" report for one or more sites over a
+    date range. Returns each day's sales excl./incl. VAT and discounts.
+  target:
+    entity:
+      integration: pilotlive
+  fields:
+    from_date:
+      name: From date
+      description: Start date of the report range (inclusive).
+      required: true
+      example: "2024-01-01"
+      selector:
+        date:
+    to_date:
+      name: To date
+      description: End date of the report range (inclusive).
+      required: true
+      example: "2024-01-31"
+      selector:
+        date:

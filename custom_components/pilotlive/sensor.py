@@ -10,10 +10,10 @@ from homeassistant.helpers.update_coordinator import (
 )
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
+from .const import API_URL, DOMAIN
+
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "pilotlive"
-API_URL = "https://app.pilotlive.co.za/api/Mobile/Sitelist"
 SCAN_INTERVAL = timedelta(seconds=300)
 
 
