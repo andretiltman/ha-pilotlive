@@ -21,8 +21,7 @@ Pilot Live Sensor for Home Assistant
 
 # Example Lovelace Card
 
-Each store is exposed as its own device with a sensor per metric (sales,
-discounts, payouts, etc.), each with its own icon. See
-[`lovelace/example-card.yaml`](lovelace/example-card.yaml) for ready-to-use
-card examples (entities list and tile grid) — swap in your store's entity
-IDs from its device page.
+Each store's metrics (sales, discounts, payouts, etc.) are exposed as
+attributes on a single sensor. See
+[`lovelace/example-card.yaml`](lovelace/example-card.yaml) for a card that
+gives each attribute its own icon — swap in your store's entity ID.

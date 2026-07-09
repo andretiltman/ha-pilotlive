@@ -1,66 +1,55 @@
-# Example Lovelace cards for a PilotLive store device.
+# Example Lovelace card for a PilotLive store sensor.
 #
-# Each store creates its own device (Settings > Devices & Services > Devices)
-# with one sensor per metric, plus the original status sensor. Icons are set
-# automatically by the integration, so the card only needs to reference the
-# entity IDs.
+# Home Assistant doesn't support per-attribute icons on an entity, but the
+# built-in "entities" card lets each row target a specific attribute of the
+# same sensor and override its icon/name individually.
 #
-# Replace "pilotlive_valley_brewery" below with your store's actual entity
-# ID prefix, found on the device page.
+# Replace "sensor.pilotlive_valley_brewery" below with your store's actual
+# entity ID.
 
-# Option 1: entities card (compact list, closest to the app's attribute view)
 type: entities
 title: PilotLive Valley Brewery
 show_header_toggle: false
 entities:
   - entity: sensor.pilotlive_valley_brewery
     name: Status
-  - entity: sensor.pilotlive_valley_brewery_total_monthly_sales
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Total Monthly Sales
     name: Total Monthly Sales
-  - entity: sensor.pilotlive_valley_brewery_daily_sales
+    icon: mdi:cash-multiple
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Daily Sales
     name: Daily Sales
-  - entity: sensor.pilotlive_valley_brewery_year_on_year
+    icon: mdi:cash
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Year on Year
     name: Year on Year
-  - entity: sensor.pilotlive_valley_brewery_projected_growth
+    icon: mdi:calendar-sync
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Projected Growth
     name: Projected Growth
-  - entity: sensor.pilotlive_valley_brewery_open_tables
+    icon: mdi:trending-up
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Open Tables
     name: Open Tables
-  - entity: sensor.pilotlive_valley_brewery_discounts
+    icon: mdi:table-furniture
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Discounts
     name: Discounts
-  - entity: sensor.pilotlive_valley_brewery_ticket_claims
+    icon: mdi:sale
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Ticket Claims
     name: Ticket Claims
-  - entity: sensor.pilotlive_valley_brewery_voids
+    icon: mdi:receipt-text-check
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Voids
     name: Voids
-  - entity: sensor.pilotlive_valley_brewery_payouts
+    icon: mdi:cancel
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Payouts
     name: Payouts
-  - entity: sensor.pilotlive_valley_brewery_last_connection
+    icon: mdi:cash-refund
+  - entity: sensor.pilotlive_valley_brewery
+    attribute: Last Connection
     name: Last Connection
-
----
-# Option 2: tile grid (bigger icons, more visual)
-type: grid
-columns: 3
-square: false
-cards:
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_total_monthly_sales
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_daily_sales
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_year_on_year
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_projected_growth
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_open_tables
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_discounts
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_ticket_claims
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_voids
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_payouts
-  - type: tile
-    entity: sensor.pilotlive_valley_brewery_last_connection
+    icon: mdi:clock-outline

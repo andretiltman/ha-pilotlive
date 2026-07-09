@@ -1,11 +1,9 @@
 import logging
-import re
 from datetime import timedelta
 
 import async_timeout
 
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     CoordinatorEntity,
@@ -18,25 +16,6 @@ DOMAIN = "pilotlive"
 API_URL = "https://app.pilotlive.co.za/api/Mobile/Sitelist"
 SCAN_INTERVAL = timedelta(seconds=300)
 
-METRIC_ICONS = {
-    "Premium Version": "mdi:crown",
-    "Total Monthly Sales": "mdi:cash-multiple",
-    "Daily Sales": "mdi:cash",
-    "Year on Year": "mdi:calendar-sync",
-    "Projected Growth": "mdi:trending-up",
-    "Open Tables": "mdi:table-furniture",
-    "Discounts": "mdi:sale",
-    "Ticket Claims": "mdi:receipt-text-check",
-    "Voids": "mdi:cancel",
-    "Payouts": "mdi:cash-refund",
-    "Last Connection": "mdi:clock-outline",
-}
-DEFAULT_METRIC_ICON = "mdi:information-outline"
-
-
-def _slugify(desc):
-    return re.sub(r"[^a-z0-9]+", "_", desc.lower()).strip("_")
-
 
 async def async_setup_entry(hass, entry, async_add_entities):
     session_id = entry.data["session_id"]
@@ -44,16 +23,14 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = PilotLiveCoordinator(hass, session_id)
     await coordinator.async_config_entry_first_refresh()
 
-    entities = []
-    for site in coordinator.data.get("SITE", []):
-        entities.append(PilotLiveSensor(coordinator, site["ID"], site["NAME"]))
-        for row in site.get("ROW", []):
-            desc = row.get("DESC")
-            if not desc:
-                continue
-            entities.append(
-                PilotLiveMetricSensor(coordinator, site["ID"], site["NAME"], desc)
-            )
+    entities = [
+        PilotLiveSensor(
+            coordinator,
+            site["ID"],
+            site["NAME"]
+        )
+        for site in coordinator.data.get("SITE", [])
+    ]
 
     async_add_entities(entities)
 
@@ -90,11 +67,6 @@ class PilotLiveSensor(CoordinatorEntity, SensorEntity):
         self.site_id = site_id
         self._attr_name = f"PilotLive {site_name}"
         self._attr_unique_id = f"pilotlive_{site_id}"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, site_id)},
-            name=site_name,
-            manufacturer="PilotLive",
-        )
 
     def _get_site(self):
         """Get latest site data from coordinator"""
@@ -142,40 +114,3 @@ class PilotLiveSensor(CoordinatorEntity, SensorEntity):
                     return "mdi:store-off"
 
         return "mdi:store"
-
-
-class PilotLiveMetricSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator, site_id, site_name, desc):
-        super().__init__(coordinator)
-        self.site_id = site_id
-        self.desc = desc
-        self._attr_name = f"PilotLive {site_name} {desc}"
-        self._attr_unique_id = f"pilotlive_{site_id}_{_slugify(desc)}"
-        self._attr_icon = METRIC_ICONS.get(desc, DEFAULT_METRIC_ICON)
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, site_id)},
-            name=site_name,
-            manufacturer="PilotLive",
-        )
-
-    def _get_site(self):
-        if not self.coordinator.data:
-            return None
-
-        for site in self.coordinator.data.get("SITE", []):
-            if site["ID"] == self.site_id:
-                return site
-
-        return None
-
-    @property
-    def state(self):
-        site = self._get_site()
-        if not site:
-            return None
-
-        for row in site.get("ROW", []):
-            if row.get("DESC") == self.desc:
-                return row.get("VALUE")
-
-        return None
