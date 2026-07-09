@@ -1,30 +1,5 @@
-# HA Pilot Live [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
-
-Pilot Live Sensor for Home Assistant
-
-<img src="img/preview.png" width="auto" height="auto"/>
-
-# Manual Install
-<details>
-<summary>Instructions</summary>
-
-1. Download and unzip to your Home Assistant `config/custom_components` folder.
-  <details>
-  <summary>Screenshot</summary>
-  
-![image](https://user-images.githubusercontent.com/2578772/164681660-57d56fc4-4713-4be5-9ef1-bf2f7cf96b64.png)
-  </details>
-  
-2. Restart Home Assistant.
-</details>
-
-# Lovelace Card Example
-
-Each store is exposed as a sensor whose state is the store's Premium Version status, with the rest of the store's data (Online, Total Monthly Sales, Daily Sales, Year on Year, Projected Growth, Open Tables, Discounts, Ticket Claims, Voids, Payouts, Last Connection) available as attributes.
-
-A ready-to-use [entities card](https://www.home-assistant.io/dashboards/entities/) example is provided in [`lovelace-examples/store-card.yaml`](lovelace-examples/store-card.yaml) — built entirely with built-in Home Assistant Lovelace features, no extra HACS frontend cards required.
-
-```yaml
+# Example Lovelace card for a single PilotLive store sensor.
+# Replace `sensor.pilotlive_valley_brewery` with your store's entity_id.
 type: entities
 title: PilotLive Valley Brewery
 state_color: true
@@ -95,6 +70,3 @@ entities:
     attribute: "Last Connection"
     name: Last Connection
     icon: mdi:clock-outline
-```
-
-Replace `sensor.pilotlive_valley_brewery` with the entity_id of your own store sensor, then add the card via **Edit Dashboard → Add Card → Manual** in Lovelace.
