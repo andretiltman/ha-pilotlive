@@ -1,0 +1,66 @@
+# Example Lovelace cards for a PilotLive store device.
+#
+# Each store creates its own device (Settings > Devices & Services > Devices)
+# with one sensor per metric, plus the original status sensor. Icons are set
+# automatically by the integration, so the card only needs to reference the
+# entity IDs.
+#
+# Replace "pilotlive_valley_brewery" below with your store's actual entity
+# ID prefix, found on the device page.
+
+# Option 1: entities card (compact list, closest to the app's attribute view)
+type: entities
+title: PilotLive Valley Brewery
+show_header_toggle: false
+entities:
+  - entity: sensor.pilotlive_valley_brewery
+    name: Status
+  - entity: sensor.pilotlive_valley_brewery_total_monthly_sales
+    name: Total Monthly Sales
+  - entity: sensor.pilotlive_valley_brewery_daily_sales
+    name: Daily Sales
+  - entity: sensor.pilotlive_valley_brewery_year_on_year
+    name: Year on Year
+  - entity: sensor.pilotlive_valley_brewery_projected_growth
+    name: Projected Growth
+  - entity: sensor.pilotlive_valley_brewery_open_tables
+    name: Open Tables
+  - entity: sensor.pilotlive_valley_brewery_discounts
+    name: Discounts
+  - entity: sensor.pilotlive_valley_brewery_ticket_claims
+    name: Ticket Claims
+  - entity: sensor.pilotlive_valley_brewery_voids
+    name: Voids
+  - entity: sensor.pilotlive_valley_brewery_payouts
+    name: Payouts
+  - entity: sensor.pilotlive_valley_brewery_last_connection
+    name: Last Connection
+
+---
+# Option 2: tile grid (bigger icons, more visual)
+type: grid
+columns: 3
+square: false
+cards:
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_total_monthly_sales
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_daily_sales
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_year_on_year
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_projected_growth
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_open_tables
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_discounts
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_ticket_claims
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_voids
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_payouts
+  - type: tile
+    entity: sensor.pilotlive_valley_brewery_last_connection
