@@ -4,9 +4,9 @@ import async_timeout
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_NAME
 
-DOMAIN = "pilotlive"
+from .const import DOMAIN
+
 _LOGGER = logging.getLogger(__name__)
 
 SEND_OTP_URL = "https://app.pilotlive.co.za/api/Mobile/SendOtp"
