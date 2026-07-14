@@ -4,9 +4,24 @@ Pilot Live Sensor for Home Assistant
 
 <img src="img/preview.png" width="auto" height="auto"/>
 
-# Manual Install
-<details>
-<summary>Instructions</summary>
+# Installation
+
+## HACS (recommended)
+
+This integration isn't in the default HACS store yet, so it needs to be added as a custom repository first.
+
+1. Make sure [HACS](https://hacs.xyz/docs/use/) is installed in your Home Assistant instance.
+2. In Home Assistant, go to **HACS**.
+3. Click the three-dot menu (⋮) in the top right corner and select **Custom repositories**.
+4. In the dialog, add:
+   - **Repository:** `https://github.com/andretiltman/ha-pilotlive`
+   - **Type:** `Integration`
+5. Click **Add**.
+6. Search HACS for **PilotLive**, open it, and click **Download**.
+7. Restart Home Assistant.
+8. Go to **Settings → Devices & Services → Add Integration**, search for **PilotLive**, and follow the prompts to set it up.
+
+## Manual Install
 
 1. Download and unzip to your Home Assistant `config/custom_components` folder.
   <details>
@@ -16,7 +31,7 @@ Pilot Live Sensor for Home Assistant
   </details>
   
 2. Restart Home Assistant.
-</details>
+3. Go to **Settings → Devices & Services → Add Integration**, search for **PilotLive**, and follow the prompts to set it up.
 
 # Lovelace Card Example
 
