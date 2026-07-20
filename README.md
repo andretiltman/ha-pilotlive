@@ -394,3 +394,69 @@ Replace `sensor.pilotlive_valley_brewery` and
 `sensor.pilotlive_valley_brewery_trading_patterns` in both files with your
 own entity_ids, then add the card via **Edit Dashboard → Add Card → Manual**
 in Lovelace.
+
+## Department Sales
+
+The Department Sales report (report ID `22`) breaks sales down by
+department. Unlike Trading Patterns' fixed Breakfast/Lunch/Dinner sections,
+a site's department list is open-ended — different sites will have
+different department names and counts. Fetch it with `pilotlive.report`:
+
+```yaml
+action: pilotlive.report
+target:
+  entity_id: sensor.pilotlive_valley_brewery
+data:
+  report_id: 22
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+```
+
+Every row is one department, except the final "Total" row, which carries
+`highlight: "2"` (every department row carries `highlight: "0"`):
+
+```yaml
+sensor.pilotlive_valley_brewery:
+  report_name: Department Sales
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+  rows:
+    - Department: CANS
+      Sales Incl: "16464.78"
+      Sales Excl: "14317.21"
+      Percentage: 24.79 %
+      highlight: "0"
+      seq: "1"
+    - Department: Total
+      Sales Incl: "66411.36"
+      Sales Excl: "57749.00"
+      Percentage: ""
+      highlight: "2"
+      seq: "7"
+```
+
+### Dashboard example: pie chart by department
+
+[`lovelace-examples/department-sales-sensor.yaml`](lovelace-examples/department-sales-sensor.yaml)
+is a trigger-based template sensor, same pattern as the other reports, that
+calls `pilotlive.report` for report ID `22` over the current month on
+startup and every 6 hours, caching the rows as an attribute.
+
+[`lovelace-examples/department-sales-pie-card.yaml`](lovelace-examples/department-sales-pie-card.yaml)
+renders every non-Total row as one pie slice using the
+[Chart.js Card](https://github.com/plckr/chartjs-card) custom card — install
+it via **HACS → Frontend** (add it as a custom repository first; it isn't in
+the default HACS store). This is a different card from the Trading Patterns
+example's ApexCharts Card: ApexCharts Card's pie/donut charts need one
+series declared per slice, which doesn't work for a department list whose
+names and count vary by site, whereas Chart.js Card's `${...}` template
+fields can evaluate to a whole array pulled straight from the cached
+sensor's `rows` attribute, so the number of slices simply follows however
+many departments the report returns. A department with a negative Sales
+Incl (heavy refunds/voids) is clamped to 0, since a negative slice can't be
+drawn.
+
+Replace `sensor.pilotlive_valley_brewery` and
+`sensor.pilotlive_valley_brewery_department_sales` in both files with your
+own entity_ids, then add the card via **Edit Dashboard → Add Card → Manual**
+in Lovelace.

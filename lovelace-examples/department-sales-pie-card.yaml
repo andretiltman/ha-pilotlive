@@ -1,0 +1,57 @@
+# Example Lovelace card for the Department Sales report, showing Sales Incl
+# split by department as a pie chart — department names and count are
+# whatever your PilotLive site returns, nothing is hardcoded.
+#
+# Requires the trigger-based template sensor from
+# `department-sales-sensor.yaml` to be set up first — that sensor calls the
+# pilotlive.report service (report_id 22) on a schedule and caches the rows
+# as an attribute, which this card turns into a pie chart.
+#
+# Requires the "Chart.js Card" custom card (https://github.com/plckr/chartjs-card)
+# from HACS — Frontend. It isn't in the default HACS store, so add it as a
+# custom repository first (HACS → the three-dot menu → Custom repositories
+# → paste the GitHub URL above → category "Dashboard").
+#
+# Unlike ApexCharts Card (used for the Trading Patterns pie chart), this
+# card's ${...} template fields can evaluate to a whole array computed from
+# an entity attribute — not just one number per declared series — which is
+# what lets ONE chart pick up however many departments are in `rows` without
+# a series/slice per department hardcoded in this file. Any row with
+# highlight "2" (the "Total" row) is excluded; every other row becomes one
+# slice, with its Sales Incl clamped to 0 if negative, since a negative
+# slice can't be drawn.
+#
+# The color list below only has 8 entries — if a site has more than 8
+# departments, Chart.js will still render every slice but start reusing
+# colors from the start of the list.
+#
+# Replace `sensor.pilotlive_valley_brewery_department_sales` with your own
+# cached report sensor's entity_id (it appears four times below).
+type: custom:chartjs-card
+chart: pie
+data:
+  labels: ${(states["sensor.pilotlive_valley_brewery_department_sales"].attributes.rows || []).filter(r => r.highlight !== "2").map(r => r["Department"])}
+  datasets:
+    - label: Sales Incl
+      backgroundColor:
+        - "#2a78d6"
+        - "#008300"
+        - "#e87ba4"
+        - "#eda100"
+        - "#1baf7a"
+        - "#eb6834"
+        - "#4a3aa7"
+        - "#e34948"
+      borderColor: var(--card-background-color)
+      borderWidth: 1
+      data: ${(states["sensor.pilotlive_valley_brewery_department_sales"].attributes.rows || []).filter(r => r.highlight !== "2").map(r => Math.max(parseFloat(r["Sales Incl"]) || 0, 0))}
+options:
+  plugins:
+    title:
+      display: true
+      text: Department Sales — Valley Brewery
+    legend:
+      position: bottom
+    tooltip:
+      callbacks:
+        label: '${(ctx) => ctx.label + ": R " + ctx.raw.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}'
