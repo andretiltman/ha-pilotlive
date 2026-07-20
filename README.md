@@ -375,16 +375,20 @@ calls `pilotlive.report` for report ID `13` over the current month on
 startup and every 6 hours, caching the rows as an attribute.
 
 [`lovelace-examples/trading-patterns-pie-card.yaml`](lovelace-examples/trading-patterns-pie-card.yaml)
-pairs each meal time's header row with its following "Sub Total" row and
-renders their Sales Incl split as a pie chart using the
+renders each meal time's "Sub Total" Sales Incl as one slice using the
 [ApexCharts Card](https://github.com/RomRider/apexcharts-card) custom card
 — install it via **HACS → Frontend** first. (A CSS-only version built with
 the built-in Markdown card was tried first, but the Markdown card's HTML
 sanitizer strips inline `style` attributes on some Home Assistant frontend
-versions, so it never rendered — ApexCharts Card draws a real pie chart
-instead of relying on raw HTML.) A meal time with a negative Sub Total (e.g.
-a period with more refunds/voids than sales) is left out of the chart
-entirely, since a negative slice can't be drawn.
+versions, so it never rendered.) ApexCharts Card's pie/donut charts map one
+series to one slice using the last value that series computes, rather than
+exploding a single series' returned data into multiple slices — so the
+example defines one series per meal time (Breakfast/Lunch/Dinner), each with
+its own `data_generator` that pairs that meal time's header row with its
+following Sub Total row. If your site has other meal-time sections, copy one
+of the series blocks and change its `target` to that section's name. A meal
+time with a negative Sub Total (e.g. a period with more refunds/voids than
+sales) is clamped to 0, since a negative slice can't be drawn.
 
 Replace `sensor.pilotlive_valley_brewery` and
 `sensor.pilotlive_valley_brewery_trading_patterns` in both files with your

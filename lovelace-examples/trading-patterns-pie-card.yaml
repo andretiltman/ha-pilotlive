@@ -6,20 +6,23 @@
 # pilotlive.report service (report_id 13) on a schedule and caches the rows
 # as an attribute, which this card turns into a pie chart.
 #
-# Requires the "apexcharts-card" custom card from HACS (Frontend section) —
-# a plain CSS conic-gradient built inside the built-in Markdown card was
-# tried first, but the Markdown card's HTML sanitizer strips inline `style`
-# attributes on some Home Assistant frontend versions, so the pie never
-# rendered. ApexCharts Card draws a real pie chart instead of relying on
-# raw HTML.
+# Requires the "apexcharts-card" custom card from HACS (Frontend section).
+#
+# ApexCharts Card's pie/donut charts map ONE series to ONE slice, using the
+# last value each series' data_generator returns — it does NOT explode a
+# single series' returned array into multiple named slices. So this needs
+# one series per meal time rather than one series returning every meal
+# time's value. If your PilotLive site has meal-time sections other than
+# Breakfast/Lunch/Dinner (e.g. a "TEA" section), add a matching series block
+# below, copying one of the existing data_generator blocks and changing the
+# `target` value to that section's name as it appears under "Trading Hour".
 #
 # Replace `sensor.pilotlive_valley_brewery_trading_patterns` with your own
 # cached report sensor's entity_id.
 #
 # Note: a meal time with a negative Sub Total (e.g. a period with more
-# refunds/voids than sales) is left out of the pie, since a negative slice
-# can't be drawn — unlike the earlier Markdown-card version, it won't show
-# up in the legend either.
+# refunds/voids than sales) is clamped to 0 here, since a negative slice
+# can't be drawn — it just won't take up any space in the pie.
 type: custom:apexcharts-card
 header:
   show: true
@@ -29,11 +32,6 @@ color_list:
   - "#2a78d6"
   - "#008300"
   - "#e87ba4"
-  - "#eda100"
-  - "#1baf7a"
-  - "#eb6834"
-  - "#4a3aa7"
-  - "#e34948"
 apex_config:
   legend:
     show: true
@@ -46,19 +44,56 @@ apex_config:
         }
 series:
   - entity: sensor.pilotlive_valley_brewery_trading_patterns
+    name: Breakfast
     data_generator: |
+      const target = 'BREAKFAST';
       const rows = entity.attributes.rows || [];
-      const result = [];
       let section = null;
+      let value = 0;
       rows.forEach((row) => {
         if (row.highlight === '2') {
           section = row['Trading Hour'];
-        } else if (row.highlight === '1' && section) {
-          const value = parseFloat(row['Sales Incl']) || 0;
-          if (value > 0) {
-            result.push([section, value]);
-          }
+        } else if (row.highlight === '1' && section === target) {
+          value = parseFloat(row['Sales Incl']) || 0;
+          section = null;
+        } else if (row.highlight === '1') {
           section = null;
         }
       });
-      return result;
+      return [[Date.now(), Math.max(value, 0)]];
+  - entity: sensor.pilotlive_valley_brewery_trading_patterns
+    name: Lunch
+    data_generator: |
+      const target = 'LUNCH';
+      const rows = entity.attributes.rows || [];
+      let section = null;
+      let value = 0;
+      rows.forEach((row) => {
+        if (row.highlight === '2') {
+          section = row['Trading Hour'];
+        } else if (row.highlight === '1' && section === target) {
+          value = parseFloat(row['Sales Incl']) || 0;
+          section = null;
+        } else if (row.highlight === '1') {
+          section = null;
+        }
+      });
+      return [[Date.now(), Math.max(value, 0)]];
+  - entity: sensor.pilotlive_valley_brewery_trading_patterns
+    name: Dinner
+    data_generator: |
+      const target = 'DINNER';
+      const rows = entity.attributes.rows || [];
+      let section = null;
+      let value = 0;
+      rows.forEach((row) => {
+        if (row.highlight === '2') {
+          section = row['Trading Hour'];
+        } else if (row.highlight === '1' && section === target) {
+          value = parseFloat(row['Sales Incl']) || 0;
+          section = null;
+        } else if (row.highlight === '1') {
+          section = null;
+        }
+      });
+      return [[Date.now(), Math.max(value, 0)]];
