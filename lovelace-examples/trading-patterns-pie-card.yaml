@@ -6,64 +6,59 @@
 # pilotlive.report service (report_id 13) on a schedule and caches the rows
 # as an attribute, which this card turns into a pie chart.
 #
-# Built entirely with the built-in Markdown card using a CSS conic-gradient
-# for the pie itself, no extra HACS frontend cards required. This relies on
-# the Markdown card allowing inline `style` attributes on plain HTML, which
-# is standard behavior in current Home Assistant.
-#
-# Output lines are built as a list and joined with an explicit \n inside the
-# {{ }} expression rather than written as literal template lines, since a
-# folded (>) YAML scalar collapses real newlines into spaces (same reasoning
-# as turnover-by-day-card.yaml).
-#
-# A meal time's Sub Total row can be negative (e.g. refunds/voids booked
-# against that period) — those are excluded from the pie slices, since a
-# negative slice can't be drawn, but are still called out by name in the
-# legend so the figure isn't silently dropped.
+# Requires the "apexcharts-card" custom card from HACS (Frontend section) —
+# a plain CSS conic-gradient built inside the built-in Markdown card was
+# tried first, but the Markdown card's HTML sanitizer strips inline `style`
+# attributes on some Home Assistant frontend versions, so the pie never
+# rendered. ApexCharts Card draws a real pie chart instead of relying on
+# raw HTML.
 #
 # Replace `sensor.pilotlive_valley_brewery_trading_patterns` with your own
 # cached report sensor's entity_id.
-type: markdown
-title: Trading Patterns by Meal Time — Valley Brewery
-content: >
-  {%- set rows = state_attr('sensor.pilotlive_valley_brewery_trading_patterns', 'rows') -%}
-  {%- set colors = ['#2a78d6', '#008300', '#e87ba4', '#eda100', '#1baf7a', '#eb6834', '#4a3aa7', '#e34948'] -%}
-  {%- if not rows -%}
-  No report data available yet — it updates every 6 hours and on startup.
-  {%- else -%}
-  {%- set ns = namespace(meals=[], section=none) -%}
-  {%- for row in rows -%}
-    {%- if row.highlight == '2' -%}
-      {%- set ns.section = row['Trading Hour'] -%}
-    {%- elif row.highlight == '1' and ns.section -%}
-      {%- set ns.meals = ns.meals + [{'name': ns.section, 'value': row['Sales Incl'] | float(0)}] -%}
-      {%- set ns.section = none -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {%- set total = ns.meals | selectattr('value', 'gt', 0) | sum(attribute='value') -%}
-  {%- if not ns.meals or total <= 0 -%}
-  No positive meal-time Sub Totals in this period to chart.
-  {%- else -%}
-  {%- set ns2 = namespace(stops=[], cum=0) -%}
-  {%- for meal in ns.meals -%}
-    {%- if meal.value > 0 -%}
-      {%- set pct = meal.value / total * 100 -%}
-      {%- set start = ns2.cum -%}
-      {%- set finish = ns2.cum + pct -%}
-      {%- set ns2.stops = ns2.stops + [colors[loop.index0 % 8] ~ ' ' ~ start ~ '% ' ~ finish ~ '%'] -%}
-      {%- set ns2.cum = finish -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {%- set ns3 = namespace(lines=['<div style="width:180px;height:180px;border-radius:50%;margin:0 auto 12px;background:conic-gradient(' ~ (ns2.stops | join(', ')) ~ ');"></div>']) -%}
-  {%- for meal in ns.meals -%}
-    {%- set color = colors[loop.index0 % 8] -%}
-    {%- if meal.value > 0 -%}
-      {%- set label = meal.name ~ ' — R ' ~ ('{:,.2f}'.format(meal.value)) ~ ' (' ~ ('%.1f' | format(meal.value / total * 100)) ~ '%)' -%}
-    {%- else -%}
-      {%- set label = meal.name ~ ' — R ' ~ ('{:,.2f}'.format(meal.value)) ~ ' (excluded, negative)' -%}
-    {%- endif -%}
-    {%- set ns3.lines = ns3.lines + ['<div style="display:flex;align-items:center;gap:8px;margin:2px 0;"><span style="width:12px;height:12px;flex-shrink:0;border-radius:2px;background:' ~ color ~ ';display:inline-block;"></span><span>' ~ label ~ '</span></div>'] -%}
-  {%- endfor -%}
-  {{ ns3.lines | join('\n') }}
-  {%- endif -%}
-  {%- endif -%}
+#
+# Note: a meal time with a negative Sub Total (e.g. a period with more
+# refunds/voids than sales) is left out of the pie, since a negative slice
+# can't be drawn — unlike the earlier Markdown-card version, it won't show
+# up in the legend either.
+type: custom:apexcharts-card
+header:
+  show: true
+  title: Trading Patterns by Meal Time — Valley Brewery
+chart_type: pie
+color_list:
+  - "#2a78d6"
+  - "#008300"
+  - "#e87ba4"
+  - "#eda100"
+  - "#1baf7a"
+  - "#eb6834"
+  - "#4a3aa7"
+  - "#e34948"
+apex_config:
+  legend:
+    show: true
+    position: bottom
+  tooltip:
+    y:
+      formatter: |
+        function(value) {
+          return 'R ' + value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+series:
+  - entity: sensor.pilotlive_valley_brewery_trading_patterns
+    data_generator: |
+      const rows = entity.attributes.rows || [];
+      const result = [];
+      let section = null;
+      rows.forEach((row) => {
+        if (row.highlight === '2') {
+          section = row['Trading Hour'];
+        } else if (row.highlight === '1' && section) {
+          const value = parseFloat(row['Sales Incl']) || 0;
+          if (value > 0) {
+            result.push([section, value]);
+          }
+          section = null;
+        }
+      });
+      return result;
