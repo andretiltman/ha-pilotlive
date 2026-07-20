@@ -21,6 +21,47 @@ turnover_by_day_report:
       example: "2024-01-31"
       selector:
         date:
+report:
+  name: Report
+  description: >-
+    Fetch any PilotLive report by its report_id for one or more sites over a
+    date range. Use pilotlive.report_list to discover valid report_id values
+    for a site.
+  target:
+    entity:
+      integration: pilotlive
+  fields:
+    report_id:
+      name: Report ID
+      description: The PilotLive report ID to fetch (see pilotlive.report_list).
+      required: true
+      example: 48
+      selector:
+        number:
+          min: 1
+          mode: box
+    from_date:
+      name: From date
+      description: Start date of the report range (inclusive).
+      required: true
+      example: "2024-01-01"
+      selector:
+        date:
+    to_date:
+      name: To date
+      description: End date of the report range (inclusive).
+      required: true
+      example: "2024-01-31"
+      selector:
+        date:
+report_list:
+  name: Report list
+  description: >-
+    List the reports available for one or more sites, as returned by the
+    PilotLive ReportList API. Use the returned report_id with pilotlive.report.
+  target:
+    entity:
+      integration: pilotlive
 last_transactions_report:
   name: Last transactions report
   description: >-
