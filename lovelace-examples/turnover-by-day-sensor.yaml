@@ -11,7 +11,7 @@ template:
       - trigger: homeassistant
         event: start
     action:
-      - action: pilotlive.turnover_by_day_report
+      - action: pilotlive.report
         target:
           entity_id: sensor.pilotlive_valley_brewery
         data:
