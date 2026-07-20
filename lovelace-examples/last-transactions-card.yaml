@@ -1,0 +1,41 @@
+# Example Lovelace card for the Last Transactions report.
+#
+# Requires the trigger-based template sensor from
+# `last-transactions-sensor.yaml` to be set up first — that sensor calls the
+# pilotlive.last_transactions_report service on a schedule and caches the
+# rows as an attribute, which this card renders as a table.
+#
+# Built entirely with the built-in Markdown card, no extra HACS frontend
+# cards required. Unlike the Turnover by Day card, the table header is built
+# dynamically from whatever columns the report returns (excluding the
+# internal `highlight`/`seq` fields), since Last Transactions' columns depend
+# on your PilotLive report layout rather than being fixed in advance.
+#
+# Replace `sensor.pilotlive_valley_brewery_last_transactions` with your own
+# cached report sensor's entity_id.
+type: markdown
+title: Last Transactions — Valley Brewery
+# Table rows are built as a list and joined with an explicit \n inside the
+# {{ }} expression rather than written as literal template lines, since a
+# folded (>) YAML scalar collapses real newlines into spaces and would merge
+# every row onto a single broken line.
+content: >
+  {%- set rows = state_attr('sensor.pilotlive_valley_brewery_last_transactions', 'rows') -%}
+  {%- if not rows -%}
+  No report data available yet — it updates every 6 hours and on startup.
+  {%- else -%}
+  {%- set columns = rows[0].keys() | reject('in', ['highlight', 'seq']) | list -%}
+  {%- set ns = namespace(lines=['| ' ~ (columns | join(' | ')) ~ ' |', '| ' ~ (columns | map('regex_replace', '.*', '---') | join(' | ')) ~ ' |']) -%}
+  {%- for row in rows -%}
+  {%- set ns2 = namespace(cells=[]) -%}
+  {%- for col in columns -%}
+  {%- set ns2.cells = ns2.cells + [row.get(col, '')] -%}
+  {%- endfor -%}
+  {%- if row.highlight == '2' -%}
+  {%- set ns.lines = ns.lines + ['| **' ~ (ns2.cells | join('** | **')) ~ '** |'] -%}
+  {%- else -%}
+  {%- set ns.lines = ns.lines + ['| ' ~ (ns2.cells | join(' | ')) ~ ' |'] -%}
+  {%- endif -%}
+  {%- endfor -%}
+  {{ ns.lines | join('\n') }}
+  {%- endif -%}

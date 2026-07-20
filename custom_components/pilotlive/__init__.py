@@ -12,6 +12,8 @@ from .const import (
     ATTR_FROM_DATE,
     ATTR_TO_DATE,
     DOMAIN,
+    LAST_TRANSACTIONS_REPORT_ID,
+    SERVICE_LAST_TRANSACTIONS_REPORT,
     SERVICE_TURNOVER_BY_DAY_REPORT,
     TURNOVER_BY_DAY_REPORT_ID,
 )
@@ -19,6 +21,14 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 TURNOVER_BY_DAY_REPORT_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_ENTITY_ID): cv.entity_ids,
+        vol.Required(ATTR_FROM_DATE): cv.date,
+        vol.Required(ATTR_TO_DATE): cv.date,
+    }
+)
+
+LAST_TRANSACTIONS_REPORT_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_ENTITY_ID): cv.entity_ids,
         vol.Required(ATTR_FROM_DATE): cv.date,
@@ -42,11 +52,8 @@ async def async_unload_entry(hass, entry):
     return await hass.config_entries.async_unload_platforms(entry, ["sensor"])
 
 
-def _async_register_services(hass: HomeAssistant) -> None:
-    if hass.services.has_service(DOMAIN, SERVICE_TURNOVER_BY_DAY_REPORT):
-        return
-
-    async def async_handle_turnover_by_day_report(call: ServiceCall) -> dict:
+def _make_report_handler(hass: HomeAssistant, report_id: int, report_label: str):
+    async def async_handle_report(call: ServiceCall) -> dict:
         entity_registry = er.async_get(hass)
         results = {}
 
@@ -68,13 +75,14 @@ def _async_register_services(hass: HomeAssistant) -> None:
                     hass,
                     entry_data["session_id"],
                     site_id,
-                    TURNOVER_BY_DAY_REPORT_ID,
+                    report_id,
                     call.data[ATTR_FROM_DATE].isoformat(),
                     call.data[ATTR_TO_DATE].isoformat(),
                 )
             except Exception as err:  # noqa: BLE001
                 _LOGGER.error(
-                    "Error fetching turnover by day report for %s: %s",
+                    "Error fetching %s report for %s: %s",
+                    report_label,
                     entity_id,
                     err,
                 )
@@ -89,10 +97,24 @@ def _async_register_services(hass: HomeAssistant) -> None:
 
         return results
 
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_TURNOVER_BY_DAY_REPORT,
-        async_handle_turnover_by_day_report,
-        schema=TURNOVER_BY_DAY_REPORT_SCHEMA,
-        supports_response=SupportsResponse.ONLY,
-    )
+    return async_handle_report
+
+
+def _async_register_services(hass: HomeAssistant) -> None:
+    if not hass.services.has_service(DOMAIN, SERVICE_TURNOVER_BY_DAY_REPORT):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_TURNOVER_BY_DAY_REPORT,
+            _make_report_handler(hass, TURNOVER_BY_DAY_REPORT_ID, "turnover by day"),
+            schema=TURNOVER_BY_DAY_REPORT_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )
+
+    if not hass.services.has_service(DOMAIN, SERVICE_LAST_TRANSACTIONS_REPORT):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_LAST_TRANSACTIONS_REPORT,
+            _make_report_handler(hass, LAST_TRANSACTIONS_REPORT_ID, "last transactions"),
+            schema=LAST_TRANSACTIONS_REPORT_SCHEMA,
+            supports_response=SupportsResponse.ONLY,
+        )

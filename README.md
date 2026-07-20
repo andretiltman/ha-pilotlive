@@ -175,3 +175,54 @@ Replace `sensor.pilotlive_valley_brewery` and
 `sensor.pilotlive_valley_brewery_turnover_by_day` in both files with your own
 entity_ids, then add the card via **Edit Dashboard → Add Card → Manual** in
 Lovelace.
+
+## Last Transactions
+
+Call `pilotlive.last_transactions_report` targeting one or more PilotLive
+sensor entities with a `from_date` and `to_date` to get the most recent
+transactions for the period:
+
+```yaml
+action: pilotlive.last_transactions_report
+target:
+  entity_id: sensor.pilotlive_valley_brewery
+data:
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+```
+
+The response has the same shape as Turnover by Day — keyed by entity_id with
+the report name, the date range and a `rows` list. The column names in each
+row depend on how PilotLive lays out the Last Transactions report (report ID
+`48`), but every row still carries `highlight` and `seq` alongside the report's
+own columns, e.g.:
+
+```yaml
+sensor.pilotlive_valley_brewery:
+  report_name: Last Transactions
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+  rows:
+    - Date: "20/09/24"
+      Time: "14:32"
+      Amount: "24.50"
+      highlight: "0"
+      seq: "1"
+```
+
+### Dashboard example
+
+[`lovelace-examples/last-transactions-sensor.yaml`](lovelace-examples/last-transactions-sensor.yaml)
+is a trigger-based template sensor, same pattern as the Turnover by Day one,
+that calls `pilotlive.last_transactions_report` for the trailing 30 days on
+startup and every 6 hours, caching the rows as an attribute.
+
+[`lovelace-examples/last-transactions-card.yaml`](lovelace-examples/last-transactions-card.yaml)
+is a Markdown card that renders those cached rows as a table, building its
+header from whatever columns the report returns rather than hardcoding
+column names, since those depend on your PilotLive report layout.
+
+Replace `sensor.pilotlive_valley_brewery` and
+`sensor.pilotlive_valley_brewery_last_transactions` in both files with your
+own entity_ids, then add the card via **Edit Dashboard → Add Card → Manual**
+in Lovelace.

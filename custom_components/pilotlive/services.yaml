@@ -21,3 +21,26 @@ turnover_by_day_report:
       example: "2024-01-31"
       selector:
         date:
+last_transactions_report:
+  name: Last transactions report
+  description: >-
+    Fetch the PilotLive "Last Transactions" report for one or more sites over a
+    date range. Returns the most recent transactions for the period.
+  target:
+    entity:
+      integration: pilotlive
+  fields:
+    from_date:
+      name: From date
+      description: Start date of the report range (inclusive).
+      required: true
+      example: "2024-01-01"
+      selector:
+        date:
+    to_date:
+      name: To date
+      description: End date of the report range (inclusive).
+      required: true
+      example: "2024-01-31"
+      selector:
+        date:
