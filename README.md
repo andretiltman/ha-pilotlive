@@ -322,3 +322,69 @@ Replace `sensor.pilotlive_valley_brewery` and
 `sensor.pilotlive_valley_brewery_last_transactions` in both files with your
 own entity_ids, then add the card via **Edit Dashboard → Add Card → Manual**
 in Lovelace.
+
+## Trading Patterns
+
+The Trading Patterns report (report ID `13`) breaks sales down by trading
+hour within each meal time (Breakfast, Lunch, Dinner, ...), with a "Sub
+Total" row per meal time and a "Grand Total" row at the end. Fetch it with
+`pilotlive.report`:
+
+```yaml
+action: pilotlive.report
+target:
+  entity_id: sensor.pilotlive_valley_brewery
+data:
+  report_id: 13
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+```
+
+Rows for a meal time's header and its "Sub Total" carry `highlight: "2"` and
+`highlight: "1"` respectively — every other row (the individual trading
+hours) carries `highlight: "0"`:
+
+```yaml
+sensor.pilotlive_valley_brewery:
+  report_name: Trading Patterns
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+  rows:
+    - Trading Hour: BREAKFAST
+      "%": null
+      Sales Incl: null
+      highlight: "2"
+      seq: "1"
+    - Trading Hour: "8"
+      "%": "31.83"
+      Sales Incl: "21141.53"
+      highlight: "0"
+      seq: "3"
+    - Trading Hour: Sub Total
+      "%": "71.42"
+      Sales Incl: "47435.44"
+      highlight: "1"
+      seq: "7"
+```
+
+### Dashboard example: pie chart by meal time
+
+[`lovelace-examples/trading-patterns-sensor.yaml`](lovelace-examples/trading-patterns-sensor.yaml)
+is a trigger-based template sensor, same pattern as the other reports, that
+calls `pilotlive.report` for report ID `13` over the current month on
+startup and every 6 hours, caching the rows as an attribute.
+
+[`lovelace-examples/trading-patterns-pie-card.yaml`](lovelace-examples/trading-patterns-pie-card.yaml)
+is a Markdown card that pairs each meal time's header row with its following
+"Sub Total" row and renders their Sales Incl split as a pie chart — no extra
+HACS frontend cards required, just a CSS conic-gradient inside the built-in
+Markdown card, with a legend below showing each meal time's Rand value and
+share of sales. A meal time with a negative Sub Total (e.g. a period with
+more refunds/voids than sales) is left out of the pie itself, since a
+negative slice can't be drawn, but is still listed in the legend so the
+figure isn't silently dropped.
+
+Replace `sensor.pilotlive_valley_brewery` and
+`sensor.pilotlive_valley_brewery_trading_patterns` in both files with your
+own entity_ids, then add the card via **Edit Dashboard → Add Card → Manual**
+in Lovelace.
