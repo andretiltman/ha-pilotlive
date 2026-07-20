@@ -119,6 +119,102 @@ Replace `sensor.pilotlive_valley_brewery` with the entity_id of your own store s
 Reports are exposed as Home Assistant services that you call against a store's
 sensor entity, returning the report data as [service response data](https://www.home-assistant.io/docs/scripts/perform-actions/#use-templates-to-determine-data-in-a-service-call).
 
+`pilotlive.turnover_by_day_report` and `pilotlive.last_transactions_report`
+below are convenience services for two commonly used reports. For any other
+report, use the generic `pilotlive.report` service together with
+`pilotlive.report_list` to look up its `report_id`.
+
+## Discovering available reports
+
+Call `pilotlive.report_list` targeting one or more PilotLive sensor entities
+to get the reports available for that site, as returned by PilotLive's
+`ReportList` API:
+
+```yaml
+action: pilotlive.report_list
+target:
+  entity_id: sensor.pilotlive_valley_brewery
+```
+
+```yaml
+sensor.pilotlive_valley_brewery:
+  reports:
+    - NAME: Last Transactions
+      ID: "48"
+      AccessRoles: "ADMIN,USER,BETA,MANAGER"
+      SortOrder: -1
+    - NAME: Turnover by Day
+      ID: "1"
+      AccessRoles: "ADMIN,USER,BETA,MANAGER"
+      SortOrder: 1
+    # ... one entry per report available to this site/session
+```
+
+The reports available depend on your site and user role. As a reference,
+these are the reports one PilotLive account had access to at the time of
+writing:
+
+| Report ID | Name |
+| ---: | --- |
+| 48 | Last Transactions |
+| 1 | Turnover by Day |
+| 33 | Turnover Comparison |
+| 2 | Turnover by Month |
+| 13 | Trading Patterns |
+| 16 | Bill Average |
+| 17 | PLU Sales |
+| 22 | Department Sales |
+| 8 | Waiter Sales |
+| 46 | Waiter Tips |
+| 15 | Main Meal Statistics |
+| 37 | Open Table Duration |
+| 38 | Open Tables (2 hours+) |
+| 11 | Staff Working |
+| 6 | Cashup Variances |
+| 7 | Prep Variances |
+| 9 | Discounts and Voids |
+| 18 | Sales Returns |
+| 3 | Purchases by Day |
+| 4 | Supplier Payments |
+| 5 | Purchases by Supplier |
+| 12 | Purchases Detail by Day |
+| 31 | Bulk Portion Details |
+| 30 | Bulk Yields |
+| 32 | Bulksheet Variances |
+| 29 | Cash Payout Audit |
+| 28 | Cash Payout Listing |
+| 14 | Income Statement |
+| 24 | Theoretical Income Statement |
+| 21 | Order Messages |
+| 74 | Last Purchase Price |
+| 10 | Supplier Phonebook |
+| 19 | Loyalty Sales |
+| 20 | Loyalty Swipe Rate |
+| 23 | Stock Valuation |
+| 25 | Backup Status |
+| 26 | Banking |
+| 40 | Tender Type |
+
+## Any report by ID
+
+Call `pilotlive.report` targeting one or more PilotLive sensor entities with
+a `report_id`, `from_date` and `to_date` to fetch any report from the table
+above (or any other report_id your site has access to):
+
+```yaml
+action: pilotlive.report
+target:
+  entity_id: sensor.pilotlive_valley_brewery
+data:
+  report_id: 22
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+```
+
+The response has the same shape as every other report service — keyed by
+entity_id with the report name, the date range and a `rows` list, with column
+names determined by whatever `report_id` you requested.
+
 ## Turnover by Day
 
 Call `pilotlive.turnover_by_day_report` targeting one or more PilotLive sensor
@@ -175,3 +271,54 @@ Replace `sensor.pilotlive_valley_brewery` and
 `sensor.pilotlive_valley_brewery_turnover_by_day` in both files with your own
 entity_ids, then add the card via **Edit Dashboard → Add Card → Manual** in
 Lovelace.
+
+## Last Transactions
+
+Call `pilotlive.last_transactions_report` targeting one or more PilotLive
+sensor entities with a `from_date` and `to_date` to get the most recent
+transactions for the period:
+
+```yaml
+action: pilotlive.last_transactions_report
+target:
+  entity_id: sensor.pilotlive_valley_brewery
+data:
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+```
+
+The response has the same shape as Turnover by Day — keyed by entity_id with
+the report name, the date range and a `rows` list. The column names in each
+row depend on how PilotLive lays out the Last Transactions report (report ID
+`48`), but every row still carries `highlight` and `seq` alongside the report's
+own columns, e.g.:
+
+```yaml
+sensor.pilotlive_valley_brewery:
+  report_name: Last Transactions
+  from_date: "2024-09-01"
+  to_date: "2024-09-30"
+  rows:
+    - Date: "20/09/24"
+      Time: "14:32"
+      Amount: "24.50"
+      highlight: "0"
+      seq: "1"
+```
+
+### Dashboard example
+
+[`lovelace-examples/last-transactions-sensor.yaml`](lovelace-examples/last-transactions-sensor.yaml)
+is a trigger-based template sensor, same pattern as the Turnover by Day one,
+that calls `pilotlive.last_transactions_report` for the trailing 30 days on
+startup and every 6 hours, caching the rows as an attribute.
+
+[`lovelace-examples/last-transactions-card.yaml`](lovelace-examples/last-transactions-card.yaml)
+is a Markdown card that renders those cached rows as a table, building its
+header from whatever columns the report returns rather than hardcoding
+column names, since those depend on your PilotLive report layout.
+
+Replace `sensor.pilotlive_valley_brewery` and
+`sensor.pilotlive_valley_brewery_last_transactions` in both files with your
+own entity_ids, then add the card via **Edit Dashboard → Add Card → Manual**
+in Lovelace.

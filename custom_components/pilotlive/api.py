@@ -6,9 +6,28 @@ import async_timeout
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import REPORT_URL
+from .const import REPORT_LIST_URL, REPORT_URL
 
 _LOGGER = logging.getLogger(__name__)
+
+
+async def async_fetch_report_list(
+    hass: HomeAssistant,
+    session_id: str,
+    site_id: str,
+) -> dict:
+    """Fetch the list of reports available for a site from the PilotLive API."""
+    params = {
+        "sessionid": session_id,
+        "siteid": site_id,
+    }
+
+    session = async_get_clientsession(hass)
+
+    async with async_timeout.timeout(30):
+        async with session.get(REPORT_LIST_URL, params=params) as resp:
+            resp.raise_for_status()
+            return await resp.json(content_type=None)
 
 
 async def async_fetch_report(
