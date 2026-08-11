@@ -322,3 +322,29 @@ Replace `sensor.pilotlive_valley_brewery` and
 `sensor.pilotlive_valley_brewery_last_transactions` in both files with your
 own entity_ids, then add the card via **Edit Dashboard → Add Card → Manual**
 in Lovelace.
+
+# Using with Claude terminal (heytcass/home-assistant-addons)
+
+If you're running Claude in a terminal against your Home Assistant instance
+via the [heytcass/home-assistant-addons](https://github.com/heytcass/home-assistant-addons)
+`ha_call_service` tool, add the following to your `CLAUDE.md` so Claude knows
+how to pull PilotLive reports for stores you own or manage:
+
+```markdown
+## PilotLive reports
+
+Pulls reporting information for Stores that I Own or Manage
+
+Target entity: `sensor.pilotlive_{store_name}`. The `pilotlive` domain exposes 4 services via `ha_call_service` (pass `return_response: true` to get the data back):
+
+- `pilotlive.report_list` — no params. Lists every available report as `{NAME, ID, AccessRoles, SortOrder}`. Run this first if unsure of a report's ID.
+- `pilotlive.report` — `report_id` (number), `from_date`, `to_date` (YYYY-MM-DD). Fetches any report by ID.
+- `pilotlive.turnover_by_day_report` — `from_date`, `to_date`. Shortcut for report ID 1 (also what the Work dashboard's "Turnover by Day" markdown card reads from `sensor.pilotlive_{store_name}_turnover_by_day`).
+- `pilotlive.last_transactions_report` — `from_date`, `to_date`. Shortcut for report ID 48.
+
+Common report IDs (from `report_list`, subject to change — re-run it if one seems missing): Last Transactions=48, Turnover by Day=1, Turnover Comparison=33, Turnover by Month=2, Trading Patterns=13, Bill Average=16, PLU Sales=17, Department Sales=22, Waiter Sales=8, Waiter Tips=46, Staff Working=11, Main Meal Statistics=15, Open Table Duration=37, Open Tables (2hrs+)=38, Order Messages=21, Cashup Variances=6, Prep Variances=7, Discounts and Voids=9, Sales Returns=18, Cash Payout Audit=29, Cash Payout Listing=28, Purchases by Day=3, Purchases Detail by Day=12, Supplier Payments=4, Purchases by Supplier=5, Last Purchase Price=74, Supplier Phonebook=10, Bulk Portion Details=31, Bulk Yields=30, Bulksheet Variances=32, Stock Valuation=23, Income Statement=14, Theoretical Income Statement=24, Banking=26, Tender Type=40, Loyalty Sales=19, Loyalty Swipe Rate=20, Backup Status=25.
+
+Example: `ha_call_service(domain="pilotlive", service="report", entity_id="sensor.pilotlive_{store_name}", data={"report_id": 3, "from_date": "2026-07-28", "to_date": "2026-08-11"}, return_response=True)` → rows come back under `service_response.<entity_id>.rows`, usually with `Sub Total`/`Grand Total` marker rows (`highlight` field flags them).
+```
+
+Replace `{store_name}` with your own entity's store name slug (see [Discovering available reports](#discovering-available-reports) above for how to find your entity_id).
