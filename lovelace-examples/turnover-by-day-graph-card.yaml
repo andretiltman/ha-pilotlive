@@ -1,0 +1,25 @@
+# Example Lovelace card for the Turnover by Day report using the custom
+# `pilotlive-graph-card` (see `lovelace/pilotlive-graph-card.js`).
+#
+# Requires:
+#   1. The trigger-based template sensor from `turnover-by-day-sensor.yaml`
+#      to be set up first — that sensor calls the pilotlive.turnover_by_day
+#      _report service on a schedule and caches the rows as an attribute,
+#      which this card charts.
+#   2. `pilotlive-graph-card.js` registered as a Lovelace resource — see the
+#      "PilotLive Graph Card" section in the README for setup steps.
+#
+# Replace `sensor.pilotlive_valley_brewery_turnover_by_day` with your own
+# cached report sensor's entity_id. Since the card reads whatever `rows`
+# attribute is on the entity, the exact same config style works for any
+# other cached PilotLive report (Turnover by Month, Turnover Comparison,
+# Bill Average, ...) by pointing `entity` at that report's sensor and
+# adjusting `date_field`/`value_field` if its columns are named differently.
+type: custom:pilotlive-graph-card
+entity: sensor.pilotlive_valley_brewery_turnover_by_day
+title: Turnover by Day — Valley Brewery
+date_field: Date
+value_field: Sales Incl
+chart_type: column
+color: "#2a78d6"
+y_prefix: "R "

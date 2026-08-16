@@ -272,6 +272,60 @@ Replace `sensor.pilotlive_valley_brewery` and
 entity_ids, then add the card via **Edit Dashboard → Add Card → Manual** in
 Lovelace.
 
+### Charting it with the PilotLive Graph Card
+
+[`lovelace/pilotlive-graph-card.js`](lovelace/pilotlive-graph-card.js) is a custom
+Lovelace card — `custom:pilotlive-graph-card` — that renders a column or line
+chart from any cached PilotLive report sensor's `rows` attribute. It doesn't
+hardcode a date format, column name, or store, so the same card works for
+Turnover by Day, Turnover by Month, Turnover Comparison, Bill Average, or any
+other report you've cached with a trigger-based template sensor as described
+above.
+
+**Installing the card:**
+
+1. Copy `lovelace/pilotlive-graph-card.js` from this repo into your Home
+   Assistant `config/www/` folder (create it if it doesn't exist).
+2. In Home Assistant, go to **Settings → Dashboards**, click the three-dot
+   menu (⋮) in the top right, and select **Resources**.
+3. Click **Add Resource**, set the URL to `/local/pilotlive-graph-card.js`,
+   and set the resource type to **JavaScript Module**.
+4. Refresh your browser (a hard refresh may be needed to clear the cache).
+5. Add the card via **Edit Dashboard → Add Card → Manual** and use a config
+   like [`lovelace-examples/turnover-by-day-graph-card.yaml`](lovelace-examples/turnover-by-day-graph-card.yaml):
+
+```yaml
+type: custom:pilotlive-graph-card
+entity: sensor.pilotlive_valley_brewery_turnover_by_day
+title: Turnover by Day — Valley Brewery
+date_field: Date
+value_field: Sales Incl
+chart_type: column
+color: "#2a78d6"
+y_prefix: "R "
+```
+
+Replace `entity` with your own cached report sensor's entity_id. Available
+options:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `entity` | *(required)* | The sensor whose `rows` attribute holds the report data. |
+| `title` | entity's `friendly_name` | Card title. |
+| `date_field` | `Date` | Row key used for the x-axis label. |
+| `value_field` | `Sales Incl` | Row key charted on the y-axis. |
+| `chart_type` | `column` | `column` or `line`. |
+| `color` | `#2a78d6` | Bar/line color. |
+| `y_prefix` | `R ` | Prefix shown on y-axis labels and tooltips. |
+| `exclude_highlight` | `["2"]` | Row `highlight` values to skip (PilotLive marks subtotal/grand-total rows with `"2"`). |
+| `max_labels` | `10` | Thins x-axis labels on wide date ranges so they don't overlap. |
+
+The x-axis value (`date_field`) is used as-is for each bar's label. If every
+row's value parses as a recognised date shape (`dd/mm/yy(yy)`,
+`yyyy-mm-dd`, or `Mon yyyy`), rows are sorted chronologically; otherwise
+rows are left in report order (e.g. a report already ranked by period or
+category name).
+
 ## Last Transactions
 
 Call `pilotlive.last_transactions_report` targeting one or more PilotLive
