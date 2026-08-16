@@ -1,5 +1,5 @@
 # Example Lovelace card for the Turnover by Day report using the custom
-# `pilotlive-graph-card` (see `www/pilotlive-graph-card.js`).
+# `pilotlive-graph-card` (see `lovelace/pilotlive-graph-card.js`).
 #
 # Requires:
 #   1. The trigger-based template sensor from `turnover-by-day-sensor.yaml`

@@ -274,7 +274,7 @@ Lovelace.
 
 ### Charting it with the PilotLive Graph Card
 
-[`www/pilotlive-graph-card.js`](www/pilotlive-graph-card.js) is a custom
+[`lovelace/pilotlive-graph-card.js`](lovelace/pilotlive-graph-card.js) is a custom
 Lovelace card — `custom:pilotlive-graph-card` — that renders a column or line
 chart from any cached PilotLive report sensor's `rows` attribute. It doesn't
 hardcode a date format, column name, or store, so the same card works for
@@ -284,7 +284,7 @@ above.
 
 **Installing the card:**
 
-1. Copy `www/pilotlive-graph-card.js` from this repo into your Home
+1. Copy `lovelace/pilotlive-graph-card.js` from this repo into your Home
    Assistant `config/www/` folder (create it if it doesn't exist).
 2. In Home Assistant, go to **Settings → Dashboards**, click the three-dot
    menu (⋮) in the top right, and select **Resources**.
